@@ -58,21 +58,68 @@ client.on('message', async message => {
     let db = loadDB();
 
     // =========================
-    // CREATE ALARM
+    // HI / INTRO MESSAGE
+    // =========================
+
+    if (lower === "hi") {
+
+        message.reply(`
+🤖 Welcome to WakeUp Bot!
+
+Never miss class again 😈
+
+COMMANDS:
+
+⏰ wake me at 08:30
+Create recurring daily alarm
+
+📝 message <text>
+Set custom wake-up message
+
+👥 set buddy <number>
+Set escalation buddy
+
+🗑 delete alarm
+Delete your alarm
+
+📋 show alarms
+View active alarms
+
+😴 awake
+Stop today's reminders
+
+Example:
+
+wake me at 08:30
+message BRO GO TO CLASS 💀
+set buddy 9198XXXXXXX
+`);
+
+        return;
+    }
+
+    // =========================
+    // CREATE / UPDATE ALARM
     // =========================
 
     if (lower.startsWith("wake me at")) {
 
         const time = text.replace(/wake me at/i, "").trim();
 
-        db = db.filter(a => !(a.user === user && a.status === "pending"));
+        // Remove existing alarm
+        db = db.filter(a => !(a.user === user));
 
         db.push({
             user,
             time,
             message: "⏰ WAKE UP!",
             buddy: null,
-            status: "pending",
+
+            // daily state
+            stoppedToday: false,
+            lastTriggeredDate: null,
+
+            // escalation flags
             lastNotified: null,
             secondAlert: false,
             buddyAlert: false
@@ -80,16 +127,15 @@ client.on('message', async message => {
 
         saveDB(db);
 
-        message.reply(
-`✅ Alarm set for ${time}
+        message.reply(`
+✅ Daily recurring alarm set for ${time}
 
 Commands:
 • message <text>
 • set buddy <number>
 • delete alarm
 • show alarms
-• awake`
-        );
+`);
     }
 
     // =========================
@@ -100,10 +146,7 @@ Commands:
 
         const customMessage = text.replace(/message/i, "").trim();
 
-        const alarm = db.find(a =>
-            a.user === user &&
-            a.status === "pending"
-        );
+        const alarm = db.find(a => a.user === user);
 
         if (!alarm) {
             message.reply("❌ No active alarm.");
@@ -127,10 +170,7 @@ Commands:
 
         const buddy = number + "@c.us";
 
-        const alarm = db.find(a =>
-            a.user === user &&
-            a.status === "pending"
-        );
+        const alarm = db.find(a => a.user === user);
 
         if (!alarm) {
             message.reply("❌ No active alarm.");
@@ -150,11 +190,9 @@ Commands:
 
     else if (lower === "delete alarm") {
 
-        const newDB = db.filter(a =>
-            !(a.user === user && a.status === "pending")
-        );
+        db = db.filter(a => a.user !== user);
 
-        saveDB(newDB);
+        saveDB(db);
 
         message.reply("🗑️ Alarm deleted.");
     }
@@ -165,17 +203,14 @@ Commands:
 
     else if (lower === "show alarms") {
 
-        const alarms = db.filter(a =>
-            a.user === user &&
-            a.status === "pending"
-        );
+        const alarms = db.filter(a => a.user === user);
 
         if (alarms.length === 0) {
             message.reply("📭 No active alarms.");
             return;
         }
 
-        let reply = "⏰ Your alarms:\n\n";
+        let reply = "⏰ Your recurring alarms:\n\n";
 
         alarms.forEach((a, i) => {
             reply += `${i+1}. ${a.time}\n`;
@@ -185,44 +220,51 @@ Commands:
     }
 
     // =========================
-    // USER WOKE UP
+    // USER IS AWAKE
     // =========================
 
     else if (lower === "awake") {
 
-        db.forEach(a => {
-            if (a.user === user && a.status === "pending") {
-                a.status = "done";
-            }
-        });
+        const alarm = db.find(a => a.user === user);
+
+        if (!alarm) {
+            message.reply("❌ No active alarm.");
+            return;
+        }
+
+        alarm.stoppedToday = true;
 
         saveDB(db);
 
-        message.reply("🔥 Good morning!");
-    }
-
-    // =========================
-    // HELP
-    // =========================
-
-    else if (lower === "help") {
-
-        message.reply(`
-🤖 Commands:
-
-wake me at 08:30
-message <text>
-set buddy <number>
-delete alarm
-show alarms
-awake
-`);
+        message.reply("🔥 Nice. Alarm stopped for today.");
     }
 
 });
 
 // =======================
-// CRON JOB
+// DAILY RESET
+// =======================
+
+cron.schedule('0 0 * * *', () => {
+
+    let db = loadDB();
+
+    db.forEach(alarm => {
+
+        alarm.stoppedToday = false;
+
+        alarm.lastNotified = null;
+        alarm.secondAlert = false;
+        alarm.buddyAlert = false;
+    });
+
+    saveDB(db);
+
+    console.log("🔄 Daily reset complete");
+});
+
+// =======================
+// MAIN ALARM CHECKER
 // =======================
 
 cron.schedule('* * * * *', async () => {
@@ -234,10 +276,17 @@ cron.schedule('* * * * *', async () => {
 
     for (let alarm of db) {
 
-        if (alarm.status !== "pending") continue;
+        // Skip if stopped today
+        if (alarm.stoppedToday) continue;
 
+        // =======================
         // FIRST ALERT
-        if (alarm.time === currentTime && !alarm.lastNotified) {
+        // =======================
+
+        if (
+            alarm.time === currentTime &&
+            !alarm.lastNotified
+        ) {
 
             await client.sendMessage(
                 alarm.user,
@@ -245,9 +294,14 @@ cron.schedule('* * * * *', async () => {
             );
 
             alarm.lastNotified = Date.now();
+
+            saveDB(db);
         }
 
+        // =======================
         // SECOND ALERT
+        // =======================
+
         else if (
             alarm.lastNotified &&
             Date.now() - alarm.lastNotified > 5*60*1000 &&
@@ -256,13 +310,18 @@ cron.schedule('* * * * *', async () => {
 
             await client.sendMessage(
                 alarm.user,
-                "⚠️ You're going to miss class!"
+                "⚠️ WAKE UP. You're going to miss class 😭"
             );
 
             alarm.secondAlert = true;
+
+            saveDB(db);
         }
 
+        // =======================
         // BUDDY ALERT
+        // =======================
+
         else if (
             alarm.lastNotified &&
             Date.now() - alarm.lastNotified > 10*60*1000 &&
@@ -278,10 +337,10 @@ cron.schedule('* * * * *', async () => {
             }
 
             alarm.buddyAlert = true;
+
+            saveDB(db);
         }
     }
-
-    saveDB(db);
 
 });
 

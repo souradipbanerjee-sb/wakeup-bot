@@ -1,3 +1,2 @@
-2026/05/09-01:11:06.717 2380 Reusing MANIFEST C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Site Characteristics Database/MANIFEST-000001
-2026/05/09-01:11:06.717 2380 Recovering log #3
-2026/05/09-01:11:06.718 2380 Reusing old log C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Site Characteristics Database/000003.log 
+2026/05/09-01:36:27.138 dfc Creating DB C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Site Characteristics Database since it was missing.
+2026/05/09-01:36:27.181 dfc Reusing MANIFEST C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Site Characteristics Database/MANIFEST-000001

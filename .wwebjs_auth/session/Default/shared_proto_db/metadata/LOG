@@ -1,3 +1,2 @@
-2026/05/09-01:11:06.860 143c Reusing MANIFEST C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\shared_proto_db\metadata/MANIFEST-000001
-2026/05/09-01:11:06.861 143c Recovering log #3
-2026/05/09-01:11:06.861 143c Reusing old log C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\shared_proto_db\metadata/000003.log 
+2026/05/09-01:36:27.209 5b94 Creating DB C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\shared_proto_db\metadata since it was missing.
+2026/05/09-01:36:27.220 5b94 Reusing MANIFEST C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\shared_proto_db\metadata/MANIFEST-000001

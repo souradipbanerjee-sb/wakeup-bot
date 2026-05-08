@@ -1,3 +1,2 @@
-2026/05/09-01:11:06.778 3340 Reusing MANIFEST C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
-2026/05/09-01:11:06.785 3340 Recovering log #3
-2026/05/09-01:11:06.787 3340 Reusing old log C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Local Storage\leveldb/000003.log 
+2026/05/09-01:36:27.237 3f30 Creating DB C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Local Storage\leveldb since it was missing.
+2026/05/09-01:36:27.265 3f30 Reusing MANIFEST C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001

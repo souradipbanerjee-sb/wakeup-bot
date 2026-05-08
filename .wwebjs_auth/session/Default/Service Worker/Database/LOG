@@ -1,3 +1,2 @@
-2026/05/09-01:11:06.717 5d44 Reusing MANIFEST C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Service Worker\Database/MANIFEST-000001
-2026/05/09-01:11:06.718 5d44 Recovering log #3
-2026/05/09-01:11:06.718 5d44 Reusing old log C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Service Worker\Database/000003.log 
+2026/05/09-01:36:28.748 5340 Creating DB C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Service Worker\Database since it was missing.
+2026/05/09-01:36:28.757 5340 Reusing MANIFEST C:\Users\soura\wakeup-bot\.wwebjs_auth\session\Default\Service Worker\Database/MANIFEST-000001
